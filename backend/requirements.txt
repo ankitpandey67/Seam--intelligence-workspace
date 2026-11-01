@@ -1,0 +1,15 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+streamlit>=1.56
+python-multipart>=0.0.9
+pandas>=2.1
+numpy>=1.26
+scikit-learn>=1.4
+xgboost>=2.0
+mlxtend>=0.23
+plotly>=5.20
+openpyxl>=3.1
+anthropic>=0.40
+requests>=2.31
+boto3>=1.34
+# optional vector store: pip install chromadb  (then set SEAM_VECTOR=chroma)

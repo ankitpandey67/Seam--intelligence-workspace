@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seam — data intelligence workspace</title>
+<meta name="theme-color" content="#091821">
+<meta name="description" content="Seam is a data intelligence workspace for exploring, forecasting, and understanding business datasets.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+<style>
+:root {
+  --bg: #edf3f8;
+  --bg-strong: #dfeafb;
+  --panel: rgba(255,255,255,0.82);
+  --panel-strong: #ffffff;
+  --ink: #132130;
+  --muted: #5a697c;
+  --line: rgba(19,33,48,0.09);
+  --side: #091821;
+  --side-soft: #122534;
+  --teal: #0c8b8a;
+  --teal-soft: rgba(12,139,138,0.12);
+  --gold: #d89a2f;
+  --gold-soft: rgba(216,154,47,0.12);
+  --red: #b54a42;
+  --shadow: 0 18px 40px rgba(3,18,28,0.08);
+}
+body[data-theme='dark'] {
+  --bg: #08141c;
+  --bg-strong: #0e1b28;
+  --panel: rgba(17,28,38,0.9);
+  --panel-strong: #111f2b;
+  --ink: #edf4ff;
+  --muted: #a6b5c6;
+  --line: rgba(255,255,255,0.08);
+  --side: #040d15;
+  --side-soft: #111f2b;
+  --teal: #4dd0c8;
+  --teal-soft: rgba(77,208,200,0.15);
+  --gold: #f2c25b;
+  --gold-soft: rgba(242,194,91,0.14);
+  --red: #ff8f8f;
+  --shadow: 0 16px 42px rgba(0,0,0,0.3);
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at top left,#ffffff 0%,var(--bg) 28%,var(--bg-strong) 100%);transition:background .25s ease,color .25s ease}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;margin:0}
+button,input,select{font:inherit}
+.app{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh}
+nav{background:linear-gradient(180deg,var(--side),var(--side-soft));color:#d7e4ee;padding:22px 14px 16px;position:sticky;top:0;height:100vh;border-right:1px solid var(--line);display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 10px 18px}
+.brand-mark{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#29bcb3,#0c7777);display:grid;place-items:center;color:#fff;font-weight:800;font-family:'Bricolage Grotesque',sans-serif;box-shadow:0 8px 18px rgba(12,139,138,.3)}
+nav h1{color:#fff;font-size:23px;letter-spacing:-.04em}
+.workspace-switch{display:flex;align-items:center;justify-content:space-between;text-align:left;width:100%;padding:11px 12px;margin:2px 0 20px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.035);color:#fff}
+.workspace-switch span{display:block;color:#9eb0c2;font-size:11px}
+.nav-label{margin:12px 10px 7px;color:#8398aa;font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+nav button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:transparent;border:0;color:inherit;font:inherit;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .2s ease}
+.nav-icon{width:18px;text-align:center;opacity:.82}
+nav button:hover:not(:disabled){background:rgba(255,255,255,0.06)}
+nav button.on{background:linear-gradient(135deg,var(--teal),#1aa5a3);color:#fff;box-shadow:0 8px 18px rgba(12,139,138,0.25)}
+nav button:disabled{opacity:.4;cursor:not-allowed}
+.nav-spacer{flex:1}
+nav .theme-toggle{border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.02)}
+.nav-footer{padding:14px 10px 0;margin-top:12px;border-top:1px solid rgba(255,255,255,.1);color:#9eb0c2;font-size:11px}
+main{padding:24px clamp(18px,3vw,42px) 40px;width:100%;max-width:1600px;margin:0 auto}
+.product-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:4px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.product-context{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+.product-actions{display:flex;align-items:center;gap:10px}
+.icon-button{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);cursor:pointer}
+.view-title{display:flex;align-items:end;justify-content:space-between;gap:14px;margin:8px 0 20px}
+.view-title h2{margin-top:8px}
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:16px}
+.dashboard-card{min-width:0}
+.dashboard-card h3{margin-bottom:12px}
+.dashboard-hero{padding:22px;background:linear-gradient(130deg,var(--panel-strong),var(--teal-soft));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.dashboard-hero h3{font-size:20px}
+.dashboard-hero .row{margin-top:16px}
+.dashboard-chart{min-height:260px}
+.dashboard-list{list-style:none;padding:0;margin:0}
+.dashboard-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+.dashboard-list li:last-child{border-bottom:0}
+.empty-state{max-width:720px;margin:6vh auto;padding:34px;text-align:center}
+.empty-state-icon{margin:0 auto 18px;width:66px;height:66px;border-radius:20px;background:var(--teal-soft);display:grid;place-items:center;color:var(--teal);font-size:28px}
+main h2{font-size:30px;letter-spacing:-.04em;margin:0}
+.sub{color:var(--muted);margin:8px 0 18px;max-width:62ch}
+.topbar{display:flex;align-items:end;justify-content:space-between;gap:16px;padding:10px 0 22px}
+.eyebrow{display:inline-block;padding:5px 10px;border-radius:999px;background:var(--teal-soft);color:var(--teal);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.quickstats{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:14px;margin:0 0 16px}
+.quickstats .stat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.quickstats b{display:block;font-size:28px;line-height:1.1;font-family:'Bricolage Grotesque',sans-serif}
+.quickstats span{color:var(--muted);font-size:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+button.btn,label.btn{background:linear-gradient(135deg,var(--teal),#0f6a6a);color:#fff;border:0;border-radius:12px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 10px 18px rgba(12,139,138,0.22);transition:transform .2s ease,box-shadow .2s ease}
+button.btn:hover,label.btn:hover{transform:translateY(-1px)}
+button.btn.alt,label.btn.alt{background:var(--panel-strong);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+button.btn:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none}
+button:focus-visible,input:focus-visible,select:focus-visible,label.btn:focus-within{outline:2px solid var(--gold);outline-offset:2px}
+input[type=text],select{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-strong);color:var(--ink)}
+input[type=text]{flex:1;min-width:240px}
+.err{background:rgba(181,74,66,0.1);border:1px solid rgba(181,74,66,0.3);color:var(--red);padding:12px 14px;border-radius:12px;margin-bottom:16px}
+.warn{background:var(--gold-soft);border:1px solid rgba(216,154,47,0.3);padding:12px 14px;border-radius:12px;margin:10px 0;color:var(--ink)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:700}
+.scroll{overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px}
+.stats{display:flex;gap:28px;flex-wrap:wrap}
+.stats b{display:block;font:700 28px 'Bricolage Grotesque';letter-spacing:-.04em}
+.stats span{color:var(--muted);font-size:13px}
+.chip{border:1px solid var(--line);background:var(--panel-strong);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:var(--teal)}
+ul.clean{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:14px}
+.answer{font-size:16px;line-height:1.7;max-width:70ch}
+.tag{font-size:12px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--teal-soft);color:var(--teal);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.upload-panel{padding:18px}
+.dropzone{border:1.5px dashed rgba(12,139,138,0.5);border-radius:18px;padding:26px 20px;background:linear-gradient(135deg,var(--teal-soft),transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:170px;text-align:center;cursor:pointer;transition:all .2s ease}
+.dropzone.dragging{border-color:var(--teal);background:rgba(12,139,138,0.08);transform:translateY(-1px)}
+.dropzone-icon{font-size:32px;display:grid;place-items:center;width:64px;height:64px;border-radius:16px;background:var(--panel-strong);box-shadow:var(--shadow)}
+.file-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.file-tag{padding:8px 12px;border-radius:999px;background:var(--panel-strong);border:1px solid var(--line);color:var(--muted);font-size:12px}
+.upload-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0 8px;color:var(--muted);font-size:13px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.topbar{display:block}.quickstats{grid-template-columns:repeat(2,minmax(120px,1fr))}nav{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);display:block}.nav-spacer,.nav-footer,.workspace-switch,.nav-label{display:none}.brand{padding-bottom:10px}nav button{display:inline-flex;width:auto;margin:2px;padding:9px 10px}nav .theme-toggle{margin-top:0}main{padding:20px 16px}.grid,.dashboard-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef}=React;
+const api=async(path,body)=>{
+  const opt=body instanceof FormData?{method:'POST',body}:body!==undefined?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{};
+  const r=await fetch('/api'+path,opt); const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.detail||r.statusText); return j;
+};
+function Plot({fig}){
+  const ref=useRef();
+  useEffect(()=>{ if(!fig) return;
+    Plotly.newPlot(ref.current,fig.data,{...fig.layout,autosize:true,paper_bgcolor:'rgba(0,0,0,0)',font:{family:'Instrument Sans, sans-serif',color:'#1B2430'}},{responsive:true,displaylogo:false});
+  },[fig]);
+  return <div ref={ref}/>;
+}
+function Table({rows,cols}){
+  if(!rows||!rows.length) return null;
+  cols=cols||Object.keys(rows[0]);
+  return <div className="scroll"><table><thead><tr>{cols.map(c=><th key={c}>{c.replace(/_/g,' ')}</th>)}</tr></thead>
+    <tbody>{rows.map((r,i)=><tr key={i}>{cols.map(c=><td key={c}>{typeof r[c]==='number'?r[c].toLocaleString():String(r[c]??'')}</td>)}</tr>)}</tbody></table></div>;
+}
+function Btn({onClick,children,alt,busy}){
+  const [b,setB]=useState(false);
+  return <button className={'btn'+(alt?' alt':'')} disabled={b||busy} onClick={async()=>{setB(true);try{await onClick()}finally{setB(false)}}}>{b?'Working…':children}</button>;
+}
+
+function DataView({st,setSt,fail}){
+  const [dragging,setDragging]=useState(false);
+  const handleFiles=async files=>{
+    if(!files?.length) return;
+    const fd=new FormData();[...files].forEach(f=>fd.append('files',f));
+    try{const r=await api('/upload',fd);setSt(s=>({...s,...r,prepared:false,prep:null}))}catch(x){fail(x)}
+  };
+  const up=async e=>{await handleFiles(e.target.files);e.target.value=''};
+  const prep=async()=>{try{const r=await api('/prepare',{});setSt(s=>({...s,prep:r,prepared:true}))}catch(x){fail(x)}};
+  const sample=async()=>{try{const r=await api('/sample',{});setSt(s=>({...s,...r,prepared:false,prep:null}))}catch(x){fail(x)}};
+  const reset=async()=>{try{const r=await api('/reset',{});setSt(s=>({...s,...r,prepared:false,prep:null}))}catch(x){fail(x)}};
+  const fileCount=st.datasets.reduce((sum,d)=>sum+d.rows,0);
+  return <>
+    <h2>Bring in your data</h2>
+    <p className="sub">Drag in multiple datasets or browse locally. Seam joins shared keys, cleans the fields, and turns raw files into an analysis-ready workspace.</p>
+    <div className="panel upload-panel">
+      <div className={`dropzone ${dragging?'dragging':''}`}
+           role="button"
+           tabIndex={0}
+           aria-label="Upload files by dropping them here or browsing"
+           onDragOver={e=>{e.preventDefault();setDragging(true)}}
+           onDragLeave={()=>setDragging(false)}
+           onDrop={e=>{e.preventDefault();setDragging(false);handleFiles(e.dataTransfer.files)}}
+           onClick={()=>document.getElementById('upload-input')?.click()}
+           onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('upload-input')?.click()}}}>
+        <div className="dropzone-icon">⬆</div>
+        <div>
+          <h3 style={{marginBottom:4}}>Drop files here</h3>
+          <div className="tag">or click to browse</div>
+        </div>
+        <input id="upload-input" type="file" multiple hidden accept=".csv,.xlsx,.xls,.json,.sql,.db,.sqlite,.txt,.md" onClick={e=>e.stopPropagation()} onChange={up}/>
+      </div>
+      <div className="row" style={{marginTop:16}}>
+        <label className="btn">Choose files<input type="file" multiple hidden accept=".csv,.xlsx,.xls,.json,.sql,.db,.sqlite,.txt,.md" onChange={up}/></label>
+        <Btn alt onClick={sample}>Load sample sales data</Btn>
+        {st.datasets.length>0&&<Btn alt onClick={reset}>Clear all</Btn>}
+      </div>
+      <div className="upload-meta">
+        <span>Supported: CSV, Excel, JSON, SQL, SQLite</span>
+        <span>{st.docs.length} document(s) attached</span>
+      </div>
+    </div>
+    {st.datasets.length>0&&<div className="panel">
+      <div className="upload-meta">
+        <span><b>{st.datasets.length}</b> dataset(s) loaded</span>
+        <span><b>{fileCount.toLocaleString()}</b> rows across all datasets</span>
+      </div>
+      <div className="file-list">{st.datasets.map((d,i)=><span key={i} className="file-tag">{d.name}: {d.rows.toLocaleString()} rows</span>)}</div>
+      {st.docs.length>0&&<p className="tag" style={{marginTop:12}}>Documents for Q&A: {st.docs.join(', ')}</p>}
+      <div style={{marginTop:14}}><Btn onClick={prep}>Clean and combine</Btn></div>
+    </div>}
+    {st.prep&&<div className="panel"><h3>Prepared {st.prep.rows.toLocaleString()} rows</h3>
+      <div className="upload-meta" style={{paddingTop:10}}>
+        <span>{st.prep.columns.length} columns after merge</span>
+        <span>{st.prep.joins.length} join(s) applied</span>
+      </div>
+      {st.prep.joins.map((j,i)=><p key={i} className="tag" style={{margin:'4px 0'}}>Joined: {j}</p>)}
+      {Object.entries(st.prep.reports).map(([n,r])=><div key={n} style={{marginTop:12}}><b>{n}</b> <span className="tag">{r.rows_before} → {r.rows_after} rows</span>
+        <ul className="clean">{r.actions.length?r.actions.map((a,i)=><li key={i}>{a}</li>):<li>Already clean</li>}</ul></div>)}
+    </div>}
+  </>;
+}
+function ExploreView({fail}){
+  const [d,setD]=useState(null);
+  useEffect(()=>{api('/eda').then(setD).catch(fail)},[]);
+  if(!d) return <p>Loading…</p>;
+  const nums=d.columns.filter(c=>c.type==='number').length;
+  return <>
+    <h2>Explore</h2><p className="sub">Distributions, trends and relationships across the combined table.</p>
+    <div className="panel stats"><div><b>{d.rows.toLocaleString()}</b><span>rows</span></div><div><b>{d.columns.length}</b><span>columns</span></div>
+      <div><b>{nums}</b><span>numeric</span></div><div><b>{d.missing_total}</b><span>missing values left</span></div></div>
+    <div className="grid">{d.figures.map((f,i)=><div className="panel" key={i}><Plot fig={f}/></div>)}</div>
+    <div className="panel"><h3>Summary statistics</h3><Table rows={d.describe}/></div>
+  </>;
+}
+function SegmentsView({fail}){
+  const [d,setD]=useState(null);
+  const run=async()=>{try{setD(await api('/cluster',{}))}catch(x){fail(x)}};
+  return <>
+    <h2>Customer segments</h2><p className="sub">K-means picks the number of groups with the best silhouette score, then names each group by what stands out.</p>
+    <Btn onClick={run}>Find segments</Btn>
+    {d&&<div style={{marginTop:16}}><div className="panel"><Plot fig={d.figure}/></div>
+      <div className="panel"><Table rows={d.segments.map(s=>({segment:s.name,customers:s.size,share:(s.share*100).toFixed(0)+'%',stands_out:s.label,...s.profile}))}/></div></div>}
+  </>;
+}
+function PatternsView({fail}){
+  const [d,setD]=useState(null);
+  const run=async()=>{try{setD(await api('/rules',{}))}catch(x){fail(x)}};
+  return <>
+    <h2>Buying patterns</h2><p className="sub">Association rules show what is bought together. Lift above 1 means the pair appears more often than chance.</p>
+    <Btn onClick={run}>Mine patterns</Btn>
+    {d&&<div className="panel" style={{marginTop:16}}>{d.source&&<p className="tag">Mined from {d.source}</p>}
+      {d.rules.length?<Table rows={d.rules}/>:<p>{d.message}</p>}</div>}
+  </>;
+}
+function PredictView({st,fail}){
+  const cols=st.prep.columns.filter(c=>c.type!=='date'&&!/_id$/.test(c.name)).map(c=>c.name);
+  const [t,setT]=useState(cols.includes('revenue')?'revenue':cols[0]);
+  const [d,setD]=useState(null),[f,setF]=useState(null);
+  const run=async()=>{try{setD(await api('/predict',{target:t}))}catch(x){fail(x)}};
+  const fc=async()=>{try{setF(await api('/forecast',{}))}catch(x){fail(x)}};
+  return <>
+    <h2>Predict</h2><p className="sub">Pick a column to predict. Seam tries several models, keeps the best by cross-validation, and shows what drives it.</p>
+    <div className="row"><select value={t} onChange={e=>setT(e.target.value)} aria-label="Column to predict">{cols.map(c=><option key={c}>{c}</option>)}</select>
+      <Btn onClick={run}>Train models</Btn><Btn alt onClick={fc}>Forecast next 3 months</Btn></div>
+    {d&&<div style={{marginTop:16}}>
+      {d.warning&&<div className="warn">{d.warning}</div>}
+      <div className="panel stats"><div><b>{d.best}</b><span>best of {d.leaderboard.length} models ({d.task})</span></div>
+        {Object.entries(d.holdout).map(([k,v])=><div key={k}><b>{v}</b><span>{k} on held-out rows</span></div>)}</div>
+      <div className="grid"><div className="panel"><Plot fig={d.figure}/></div>
+        <div className="panel"><h3>Model leaderboard</h3><Table rows={d.leaderboard}/><h3 style={{marginTop:16}}>Sample predictions</h3><Table rows={d.predictions}/></div></div></div>}
+    {f&&<div className="panel" style={{marginTop:16}}><Plot fig={f.figure}/><p className="tag">{f.seasonal?'Trend plus monthly seasonality.':'Linear trend only; add 24+ months of history for seasonality.'}</p></div>}
+  </>;
+}
+function AskView({fail}){
+  const [q,setQ]=useState(''),[a,setA]=useState(null),[ins,setIns]=useState(null);
+  const go=async text=>{const qq=text??q;if(!qq.trim())return;setQ(qq);try{setA(await api('/ask',{question:qq}))}catch(x){fail(x)}};
+  const ex=['What were the top-selling products, and what factors influenced sales?','Average revenue by channel','Show monthly revenue trend','Which 3 cities have the lowest sales?'];
+  return <>
+    <h2>Ask your data</h2><p className="sub">Questions become a safe query plan that runs on your data, then the answer is explained in plain language.</p>
+    <div className="row"><input type="text" value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Ask about your data" aria-label="Question"/>
+      <Btn onClick={()=>go()}>Ask</Btn></div>
+    <div className="row" style={{margin:'10px 0 18px'}}>{ex.map(e=><button key={e} className="chip" onClick={()=>go(e)}>{e}</button>)}</div>
+    {a&&<div className="panel"><p className="answer">{a.answer}</p>
+      {a.plan&&<p className="tag">Interpreted as {a.plan.agg}{a.plan.metric?' of '+a.plan.metric:''} by {a.plan.by||'—'}{a.plan.drivers?', with driver analysis':''} (planner: {a.planner}){!a.llm&&'. Set ANTHROPIC_API_KEY for richer language understanding.'}</p>}
+      {a.sources?.length>0&&<p className="tag">Context from: {[...new Set(a.sources)].join(', ')}</p>}
+      <div className="grid">{a.figure&&<Plot fig={a.figure}/>}{a.drivers_figure&&<Plot fig={a.drivers_figure}/>}</div>
+      {a.table&&<Table rows={a.table}/>}</div>}
+    <div className="panel"><div className="row"><h3>Business insights</h3><Btn alt onClick={async()=>{try{setIns(await api('/insights',{}))}catch(x){fail(x)}}}>Generate insights</Btn></div>
+      {ins&&<><ul style={{paddingLeft:18}}>{ins.bullets.map((b,i)=><li key={i} style={{margin:'6px 0'}}>{b}</li>)}</ul>
+        <p className="tag">{ins.llm?'Written by the language model from computed results.':'Rule-based summary. Set ANTHROPIC_API_KEY for richer recommendations.'}</p></>}</div>
+  </>;
+}
+function DashboardView({st,setSt,setView,fail}){
+  const [d,setD]=useState(null);
+  useEffect(()=>{
+    if(!st.prepared){setD(null);return}
+    api('/eda').then(setD).catch(fail);
+  },[st.prepared]);
+  const cols=d?.columns||[];
+  const numeric=cols.filter(c=>c.type==='number').length;
+  const cards=[
+    {label:'Rows analyzed',value:d?.rows?.toLocaleString()??'—',icon:'▤'},
+    {label:'Fields available',value:cols.length||'—',icon:'◫'},
+    {label:'Numeric measures',value:d?numeric:'—',icon:'↗'},
+    {label:'Missing values',value:d?.missing_total?.toLocaleString()??'—',icon:'◌'}
+  ];
+  if(!st.prepared) return <div className="panel empty-state">
+    <div className="empty-state-icon">✦</div>
+    <span className="eyebrow">Your workspace is ready</span>
+    <h2 style={{marginTop:12}}>Start with your data</h2>
+    <p className="sub" style={{margin:'10px auto 20px'}}>Upload a file or load the sample workspace to explore trends, discover segments, and build predictions.</p>
+    <div className="row" style={{justifyContent:'center'}}>
+      <Btn onClick={()=>setView('data')}>Add your data</Btn>
+      <Btn alt onClick={async()=>{try{const r=await api('/sample',{});setSt(s=>({...s,...r,prepared:false,prep:null}));setView('data')}catch(x){fail(x)}}}>Try sample data</Btn>
+    </div>
+  </div>;
+  if(!d) return <div className="panel">Loading workspace analytics…</div>;
+  return <>
+    <div className="view-title">
+      <div><span className="eyebrow">Workspace overview</span><h2>Good to see you</h2><p className="sub">A live snapshot of your prepared data and analysis tools.</p></div>
+      <button className="btn alt" onClick={()=>setView('data')}>Manage data</button>
+    </div>
+    <div className="quickstats">
+      {cards.map(c=><div className="stat" key={c.label}><span className="badge">{c.icon} {c.label}</span><b style={{marginTop:10}}>{c.value}</b></div>)}
+    </div>
+    <div className="dashboard-grid">
+      <section>
+        <div className="dashboard-hero">
+          <span className="eyebrow">Analysis workspace</span>
+          <h3 style={{marginTop:8}}>Turn your data into a decision.</h3>
+          <p className="sub" style={{marginBottom:0}}>Explore the dataset, identify customer groups, forecast performance, or ask a question in plain language.</p>
+          <div className="row">
+            <button className="btn" onClick={()=>setView('explore')}>Open analytics</button>
+            <button className="btn alt" onClick={()=>setView('ask')}>Ask your data</button>
+          </div>
+        </div>
+        {d.figures.length>0?<div className="panel dashboard-card"><h3>Data signals</h3><div className="grid">{d.figures.slice(0,2).map((f,i)=><div className="dashboard-chart" key={i}><Plot fig={f}/></div>)}</div></div>:
+          <div className="panel"><h3>Data signals</h3><p className="tag">No chartable numeric or date fields were found in this dataset.</p></div>}
+      </section>
+      <section>
+        <div className="panel dashboard-card">
+          <h3>Analysis tools</h3>
+          <ul className="dashboard-list">
+            {[['Explore','Explore distributions and relationships','explore'],['Segments','Find groups in your customers','segments'],['Patterns','Discover items bought together','patterns'],['Predict','Train a model or forecast','predict'],['Ask','Query the data in plain English','ask']].map(([label,desc,key])=>
+              <li key={key}><span><b>{label}</b><br/><span className="tag">{desc}</span></span><button className="chip" onClick={()=>setView(key)}>Open →</button></li>)}
+          </ul>
+        </div>
+        <div className="panel dashboard-card">
+          <h3>Dataset profile</h3>
+          <ul className="dashboard-list">
+            {cols.slice(0,8).map(c=><li key={c.name}><span>{c.name}</span><span className="badge">{c.type}</span></li>)}
+          </ul>
+          {cols.length>8&&<p className="tag">And {cols.length-8} more fields</p>}
+        </div>
+      </section>
+    </div>
+  </>;
+}
+function App(){
+  const [st,setSt]=useState({datasets:[],docs:[],prepared:false,prep:null});
+  const [view,setView]=useState('home'),[err,setErr]=useState('');
+  const [isDark,setIsDark]=useState(false);
+  const fail=e=>setErr(e.message||String(e));
+  useEffect(()=>{document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');},[isDark]);
+  useEffect(()=>{
+    api('/health').then(async h=>{
+      let restored={datasets:h.datasets||[],docs:h.docs||[],prepared:false,prep:null};
+      if(h.prepared){restored={...restored,prepared:true,prep:await api('/prepare',{})}}
+      setSt(restored);
+    }).catch(fail);
+  },[]);
+  const items=[['home','Overview','⌂'],['data','Data','▤'],['explore','Analytics','◫'],['segments','Segments','◉'],['patterns','Patterns','⧉'],['predict','Predict','↗'],['ask','Ask Seam','✦']];
+  const V={home:DashboardView,data:DataView,explore:ExploreView,segments:SegmentsView,patterns:PatternsView,predict:PredictView,ask:AskView}[view];
+  const titles={home:'Overview',data:'Data',explore:'Analytics',segments:'Customer segments',patterns:'Buying patterns',predict:'Prediction studio',ask:'Ask Seam'};
+  return <div className="app"><nav aria-label="Primary navigation">
+    <div className="brand"><div className="brand-mark">S</div><h1>Seam</h1></div>
+    <button className="workspace-switch" onClick={()=>setView('home')}><span>WORKSPACE<span>{st.prepared?'Dataset connected':'No dataset loaded'}</span></span><b>⌄</b></button>
+    <div className="nav-label">Workspace</div>
+    {items.map(([k,l,icon])=><button key={k} className={view===k?'on':''} aria-current={view===k?'page':undefined} disabled={k!=='home'&&k!=='data'&&!st.prepared} onClick={()=>{setErr('');setView(k)}}><span className="nav-icon">{icon}</span>{l}</button>)}
+    <div className="nav-spacer"></div>
+    <button className="theme-toggle" onClick={()=>setIsDark(d=>!d)}><span className="nav-icon">{isDark?'☼':'◐'}</span>{isDark?'Light appearance':'Dark appearance'}</button>
+    <div className="nav-footer">Seam Analytics<br/>Private workspace</div>
+  </nav>
+    <main>
+      <div className="product-bar">
+        <div className="product-context"><span>Workspace</span><b>/</b><strong>{titles[view]}</strong></div>
+        <div className="product-actions">
+          <span className="badge">{st.prepared ? '● Data ready' : '○ No data'}</span>
+          <button className="icon-button" title="Toggle appearance" aria-label="Toggle appearance" onClick={()=>setIsDark(d=>!d)}>{isDark?'☼':'◐'}</button>
+        </div>
+      </div>
+      {err&&<div className="err" role="alert">{err}</div>}
+      {view==='home'?<DashboardView key={view} st={st} setSt={setSt} setView={setView} fail={fail}/>:
+        <V key={view} st={st} setSt={setSt} fail={fail}/>}
+    </main></div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
